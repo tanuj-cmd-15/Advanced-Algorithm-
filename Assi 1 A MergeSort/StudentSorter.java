@@ -92,9 +92,9 @@ public class StudentSorter {
             new Student("Gayatri", 4, 82),
             new Student("Rutik", 1, 95),
             new Student("Vivek", 6, 88),
-            new Student("Kalyani", 7, 91),
+            new Student("Kalyania", 7, 91),
             new Student("Rutuja", 8, 79),
-            new Student("Jay", 10, 84),
+            new Student("Kalyanib", 10, 84),
             new Student("Anita", 9, 80)
         };
 
@@ -129,6 +129,8 @@ public class StudentSorter {
             for (Student student : students) {
                 System.out.println(student);
             }
+            
         }
+        
     }
 }
