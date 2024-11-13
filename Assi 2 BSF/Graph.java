@@ -62,7 +62,7 @@ class Graph {
         }
 
         for (String[] edge : edges) {
-            addEdge(edge[0], edge[1], 1); // default weight as 1 for unweighted graph
+            addEdge(edge[0], edge[1], 1); 
         }
     }
 
@@ -84,7 +84,6 @@ class Graph {
             return;
         }
 
-        // Initialize vertices
         for (Vertex v : vertices.values()) {
             v.color = "WHITE";
             v.distance = Integer.MAX_VALUE;

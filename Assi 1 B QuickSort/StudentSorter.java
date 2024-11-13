@@ -28,7 +28,7 @@ public class StudentSorter {
     }
 
     private static int partition(Student[] arr, int start, int end, String sortField) {
-        // Select a random pivot index and swap with end element
+    
         int randomIndex = start + (int) (Math.random() * (end - start + 1));
         swap(arr, end, randomIndex);
 

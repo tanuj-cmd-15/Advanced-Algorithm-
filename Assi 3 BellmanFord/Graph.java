@@ -1,84 +1,131 @@
 import java.util.*;
 
+class Vertex {
+    String name;
+    Vertex predecessor;
+    int distance;
+
+    public Vertex(String name) {
+        this.name = name;
+        this.predecessor = null;
+        this.distance = Integer.MAX_VALUE; // Initialize distance to infinity
+    }
+
+    @Override
+    public String toString() {
+        return "Vertex{" +
+                "name='" + name + '\'' +
+                ", distance=" + (distance == Integer.MAX_VALUE ? "∞" : distance) +
+                ", predecessor=" + (predecessor != null ? predecessor.name : "NIL") +
+                '}';
+    }
+}
+
+class Edge {
+    Vertex start;
+    Vertex end;
+    int weight;
+
+    public Edge(Vertex start, Vertex end, int weight) {
+        this.start = start;
+        this.end = end;
+        this.weight = weight;
+    }
+
+    @Override
+    public String toString() {
+        return "Edge{" +
+                "start=" + start.name +
+                ", end=" + end.name +
+                ", weight=" + weight +
+                '}';
+    }
+}
+
 class Graph {
-    static class Edge {
-        String start, end;
-        int weight;
-
-        Edge(String start, String end, int weight) {
-            this.start = start;
-            this.end = end;
-            this.weight = weight;
-        }
-    }
-
-    private Map<String, Integer> vertexMap;
+    private Map<String, Vertex> vertices;
     private List<Edge> edges;
-    private Map<String, Integer> distance;
-    private Map<String, String> predecessor;
 
-    public Graph(List<String> vertices, List<Edge> edges) {
-        this.vertexMap = new HashMap<>();
-        this.edges = edges;
-        this.distance = new HashMap<>();
-        this.predecessor = new HashMap<>();
+    public Graph(List<String> vertexNames, List<String[]> edgesData) {
+        vertices = new HashMap<>();
+        edges = new ArrayList<>();
 
-        for (int i = 0; i < vertices.size(); i++) {
-            vertexMap.put(vertices.get(i), i);
-            distance.put(vertices.get(i), Integer.MAX_VALUE);
-            predecessor.put(vertices.get(i), "NIL");
+        for (String name : vertexNames) {
+            vertices.put(name, new Vertex(name));
+        }
+
+        for (String[] edgeData : edgesData) {
+            addEdge(edgeData[0], edgeData[1], Integer.parseInt(edgeData[2]));
         }
     }
 
-    public boolean bellmanFord(String source) {
-        distance.put(source, 0); 
+    public void addEdge(String startName, String endName, int weight) {
+        Vertex start = vertices.get(startName);
+        Vertex end = vertices.get(endName);
 
-        for (int i = 1; i < vertexMap.size(); i++) {
+        if (start != null && end != null) {
+            edges.add(new Edge(start, end, weight));
+        }
+    }
+
+    private void initializeSingleSource(Vertex source) {
+        for (Vertex vertex : vertices.values()) {
+            vertex.distance = Integer.MAX_VALUE;
+            vertex.predecessor = null;
+        }
+        source.distance = 0;
+    }
+
+    private boolean relax(Vertex u, Vertex v, int weight) {
+        if (v.distance > u.distance + weight) {
+            v.distance = u.distance + weight;
+            v.predecessor = u;
+            return true;
+        }
+        return false;
+    }
+
+    public boolean bellmanFord(String sourceName) {
+        Vertex source = vertices.get(sourceName);
+        if (source == null) return false;
+
+        initializeSingleSource(source);
+
+        for (int i = 1; i < vertices.size(); i++) {
             for (Edge edge : edges) {
-                if (distance.get(edge.start) != Integer.MAX_VALUE &&
-                    distance.get(edge.start) + edge.weight < distance.get(edge.end)) {
-                    distance.put(edge.end, distance.get(edge.start) + edge.weight);
-                    predecessor.put(edge.end, edge.start);
-                }
+                relax(edge.start, edge.end, edge.weight);
             }
         }
 
         for (Edge edge : edges) {
-            if (distance.get(edge.start) != Integer.MAX_VALUE &&
-                distance.get(edge.start) + edge.weight < distance.get(edge.end)) {
-                return false; 
+            if (edge.end.distance > edge.start.distance + edge.weight) {
+                return false; // Negative weight cycle detected
             }
         }
 
         return true;
     }
 
-  
     public void printShortestPaths() {
-        for (Map.Entry<String, Integer> entry : distance.entrySet()) {
-            String vertex = entry.getKey();
-            int dist = entry.getValue();
-            String pred = predecessor.get(vertex);
-            System.out.println(vertex + " (distance=" + (dist == Integer.MAX_VALUE ? "∞" : dist) +
-                               ", predecessor=" + (pred.equals("NIL") ? "NIL" : pred) + ")");
+        for (Vertex vertex : vertices.values()) {
+            System.out.println(vertex);
         }
     }
 
-   
     public static void main(String[] args) {
-        List<String> vertices = Arrays.asList( "A", "B", "C", "D", "E");
+        List<String> vertexNames = Arrays.asList("A", "B", "C", "D", "E");
 
-        List<Edge> edges = Arrays.asList(
-            new Edge("A", "B", 4), 
-            new Edge("A", "C", 2),
-            new Edge("B", "C", 5),
-            new Edge("C", "E", 3),
-            new Edge("B", "D", 10),
-            new Edge("E", "D", 2),
-            new Edge("D", "E", -1)    
+        List<String[]> edgesData = Arrays.asList(
+            new String[]{"A", "B", "4"},
+            new String[]{"A", "C", "2"},
+            new String[]{"B", "C", "5"},
+            new String[]{"B", "D", "10"},
+            new String[]{"C", "E", "3"},
+            new String[]{"E", "D", "2"},
+            new String[]{"D", "E", "-1"}
         );
 
-        Graph graph = new Graph(vertices, edges);
+        Graph graph = new Graph(vertexNames, edgesData);
 
         System.out.println("Running Bellman-Ford Algorithm from source A:");
         if (graph.bellmanFord("A")) {
